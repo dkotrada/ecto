@@ -43,6 +43,17 @@ defmodule Ecto.MultiTest do
     assert multi.operations == [{:comment, {:changeset, %{changeset | action: :insert}, []}}]
   end
 
+  test "insert fun" do
+    changeset = Changeset.change(%Comment{})
+    fun = fn _changes -> {:ok, changeset} end
+    multi =
+      Multi.new
+      |> Multi.insert(:fun, fun)
+
+    assert multi.names == MapSet.new([:fun])
+    assert [{:fun, {:run, _fun}}] = multi.operations
+  end
+
   test "update changeset" do
     changeset = Changeset.change(%Comment{})
     multi     =
@@ -51,6 +62,17 @@ defmodule Ecto.MultiTest do
 
     assert multi.names      == MapSet.new([:comment])
     assert multi.operations == [{:comment, {:changeset, %{changeset | action: :update}, []}}]
+  end
+
+  test "update fun" do
+    changeset = Changeset.change(%Comment{})
+    fun = fn _changes -> {:ok, changeset} end
+    multi =
+      Multi.new
+      |> Multi.update(:fun, fun)
+
+    assert multi.names == MapSet.new([:fun])
+    assert [{:fun, {:run, _fun}}] = multi.operations
   end
 
   test "insert_or_update changeset will insert the changeset if not loaded" do
@@ -74,6 +96,17 @@ defmodule Ecto.MultiTest do
     assert multi.operations == [{:comment, {:changeset, %{changeset | action: :update}, []}}]
   end
 
+  test "insert_or_update fun" do
+    changeset = Changeset.change(%Comment{})
+    fun = fn _changes -> {:ok, changeset} end
+    multi =
+      Multi.new
+      |> Multi.insert_or_update(:fun, fun)
+
+    assert multi.names == MapSet.new([:fun])
+    assert [{:fun, {:run, _fun}}] = multi.operations
+  end
+
   test "delete changeset" do
     changeset = Changeset.change(%Comment{})
     multi     =
@@ -93,6 +126,17 @@ defmodule Ecto.MultiTest do
 
     assert multi.names      == MapSet.new([:comment])
     assert multi.operations == [{:comment, {:changeset, %{changeset | action: :delete}, []}}]
+  end
+
+  test "delete fun" do
+    changeset = Changeset.change(%Comment{})
+    fun = fn _changes -> {:ok, changeset} end
+    multi =
+      Multi.new
+      |> Multi.delete(:fun, fun)
+
+    assert multi.names == MapSet.new([:fun])
+    assert [{:fun, {:run, _fun}}] = multi.operations
   end
 
   test "error" do
@@ -325,6 +369,7 @@ defmodule Ecto.MultiTest do
         |> Multi.insert(:insert, changeset)
         |> Multi.run(:run, fn _repo, changes -> {:ok, changes} end)
         |> Multi.update(:update, changeset)
+        |> Multi.update(:update_fun, fn _changes -> {:ok, changeset} end)
         |> Multi.delete(:delete, changeset)
         |> Multi.insert_all(:insert_all, Comment, [[x: 1]])
         |> Multi.update_all(:update_all, Comment, set: [x: 1])
@@ -333,10 +378,19 @@ defmodule Ecto.MultiTest do
       assert {:ok, changes} = TestRepo.transaction(multi)
       assert_received {:transaction, _}
       assert {:messages, actions} = Process.info(self(), :messages)
-      assert actions == [{:insert, {nil, "comments"}}, {:update, {nil, "comments"}}, {:delete, {nil, "comments"}}, {:insert_all, {nil, "comments"}, [[x: 1]]},
-                         {:update_all, {nil, "comments"}}, {:delete_all, {nil, "comments"}}]
+      assert actions == [
+        {:insert, {nil, "comments"}},
+        {:update, {nil, "comments"}},
+        {:update, {nil, "comments"}},
+        {:delete, {nil, "comments"}},
+        {:insert_all, {nil, "comments"}, [[x: 1]]},
+        {:update_all, {nil, "comments"}},
+        {:delete_all, {nil, "comments"}}
+      ]
+
       assert %Comment{} = changes.insert
       assert %Comment{} = changes.update
+      assert %Comment{} = changes.update_fun
       assert %Comment{} = changes.delete
       assert {1, nil}   = changes.insert_all
       assert {1, nil}   = changes.update_all
@@ -367,6 +421,23 @@ defmodule Ecto.MultiTest do
       assert %Comment{} = changes.insert
       refute Map.has_key?(changes, :run)
       refute Map.has_key?(changes, :update)
+    end
+
+    test "rolls back from update fun" do
+      changeset = Changeset.change(%Comment{id: 1}, x: 1)
+      multi =
+        Multi.new
+        |> Multi.insert(:insert, changeset)
+        |> Multi.update(:update, fn _changes -> {:error, "error from run"} end)
+        |> Multi.delete(:delete, changeset)
+
+      assert {:error, :update, "error from run", changes} = TestRepo.transaction(multi)
+      assert_received {:transaction, _}
+      assert_received {:rollback, _}
+      assert {:messages, [{:insert, {nil, "comments"}}]} == Process.info(self(), :messages)
+      assert %Comment{} = changes.insert
+      refute Map.has_key?(changes, :update)
+      refute Map.has_key?(changes, :delete)
     end
 
     test "rolls back from repo" do
