@@ -278,6 +278,18 @@ iex> Repo.all(User) |> Repo.preload(:avatar)
 
 ### Prep
 
+If you comes from **one-to-one** section of this guide then you need to recreate your existing database.
+
+Run in terminal:
+```
+$ mix ecto.drop --repo EctoAssoc.Repo
+```
+
+Run in terminal:
+```
+$ mix ecto.create --repo EctoAssoc.Repo
+```
+
 Let's assume we have two schemas: `User` and `Post`. The `User` schema was defined in the previous section and the `Post` schema will be defined now.
 
 Let's start with the migration:
