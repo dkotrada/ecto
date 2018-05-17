@@ -93,7 +93,7 @@ Let's start with two schemas that are not yet associated: `User` and `Avatar`.
 We will generate the migration for `User`:
 
 ```elixir
-mix ecto.gen.migration create_user
+$ mix ecto.gen.migration create_user
 ```
 
 And add some columns:
@@ -129,7 +129,7 @@ end
 `Avatar` also has its own migration as well:
 
 ```
-mix ecto.gen.migration create_avatar
+$ mix ecto.gen.migration create_avatar
 ```
 
 with the following columns:
@@ -174,7 +174,7 @@ The difference between [`has_one`](Ecto.Schema.html#has_one/3) and [`belongs_to`
 For the `Avatar` we create a migration that adds a `user_id` reference:
 
 ```
-mix ecto.gen.migration avatar_belongs_to_user
+$ mix ecto.gen.migration avatar_belongs_to_user
 ```
 
 with the following steps:
@@ -283,7 +283,7 @@ Let's assume we have two schemas: `User` and `Post`. The `User` schema was defin
 Let's start with the migration:
 
 ```
-mix ecto.gen.migration create_posts
+$ mix ecto.gen.migration create_posts
 ```
 
 with the following columns:
@@ -326,7 +326,7 @@ Now we want to associate the user with the post and vice-versa:
 As in `one-to-one` associations, the `belongs_to` reveals on which table the foreign key should be added. For the `Post` we create a migration that adds a `user_id` reference:
 
 ```
-mix ecto.gen.migration post_belongs_to_user
+$ mix ecto.gen.migration post_belongs_to_user
 ```
 
 with the following contents:
@@ -456,7 +456,7 @@ Let's assume we have two schemas: `Post` and `Tag`. The `Post` schema was define
 Let's start with the tag migration:
 
 ```
-mix ecto.gen.migration create_tags
+$ mix ecto.gen.migration create_tags
 ```
 
 with the following columns:
@@ -500,7 +500,7 @@ One way to handle `many-to-many` relationships is to introduce an additional tab
 So let's do that:
 
 ```
-mix ecto.gen.migration create_posts_tags
+$ mix ecto.gen.migration create_posts_tags
 ```
 
 with the following contents:
