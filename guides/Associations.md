@@ -37,6 +37,17 @@ Let's generate a repo and create the corresponding DB.
 $ mix ecto.gen.repo -r EctoAssoc.Repo
 ```
 
+---
+REVIEW: After executing the command above I get this message in console:
+```
+Don't forget to add your new repo to your supervision tree
+(typically in lib/friends/application.ex):
+
+    supervisor(EctoAssoc.Repo, [])
+```
+REVIEW: Add corresponding version or in my opinion just a link to documentation with a hint to user he should look for corresponding version
+---
+
 Make sure the config for the repo is set properly:
 
 ```elixir
