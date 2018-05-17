@@ -31,6 +31,14 @@ defp deps do
 end
 ```
 
+--- 
+REVIEW: Here is a missing step.
+
+Let's fetch those dependencies and make them available by running 
+
+`$ mix deps.get`
+---
+
 Let's generate a repo and create the corresponding DB.
 
 ```
