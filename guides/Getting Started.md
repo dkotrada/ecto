@@ -24,6 +24,7 @@ The `--sup` option ensures that this application has [a supervision tree](http:/
 
 To add Ecto to this application, there are a few steps that we need to take. The first step will be adding Ecto and a driver called Postgrex to our `mix.exs` file, which we'll do by changing the `deps` definition in that file to this:
 
+REVIEW: postgrex ist at 0.13.5 and ecto is at 2.2.10 now. Why should I use 2.0 and 0.11. One more thing: What does `~>` mean? Since it is not explained in mix guide. https://hexdocs.pm/mix/Mix.Tasks.Deps.html
 ```elixir
 defp deps do
   [{:ecto, "~> 2.0"},
